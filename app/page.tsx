@@ -6,7 +6,7 @@ export default async function Home() {
 
   const { data, error } = await supabase
     .from("materias_primas")
-    .select("id, nombre, cantidad, unidad, actualizado_en, movimientos(id, cantidad_anterior, cantidad_nueva, unidad, nota, creado_en)")
+    .select("id, nombre, cantidad, capacidad_maxima, unidad, actualizado_en, movimientos(id, cantidad_anterior, cantidad_nueva, unidad, nota, creado_en)")
     .order("nombre", { ascending: true })
     .order("creado_en", { ascending: false, referencedTable: "movimientos" })
 
@@ -17,10 +17,10 @@ export default async function Home() {
       <main className="mx-auto flex w-full max-w-4xl flex-col gap-8 px-6 py-12">
         <header className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight text-balance">
-            Registro de niveles de materia prima
+            Nivel de tanques termo
           </h1>
           <p className="text-muted-foreground text-pretty">
-            Consulta y actualiza los niveles de existencia de cada gas. Cada cambio queda guardado en el historial.
+            Captura la cantidad y la capacidad de cada tanque para ver su porcentaje de llenado.
           </p>
         </header>
 
