@@ -8,7 +8,6 @@ export type ActionResult = { ok: boolean; error?: string }
 export async function actualizarNivel(formData: FormData): Promise<ActionResult> {
   const id = String(formData.get("id") || "")
   const cantidadRaw = String(formData.get("cantidad") || "")
-  const capacidadRaw = String(formData.get("capacidad_maxima") || "")
   const unidad = String(formData.get("unidad") || "").trim()
   const nota = String(formData.get("nota") || "").trim()
 
@@ -17,14 +16,6 @@ export async function actualizarNivel(formData: FormData): Promise<ActionResult>
   const cantidadNueva = Number(cantidadRaw)
   if (!Number.isFinite(cantidadNueva) || cantidadNueva < 0) {
     return { ok: false, error: "La cantidad debe ser un número válido mayor o igual a cero." }
-  }
-
-  const capacidadMaxima = Number(capacidadRaw)
-  if (!Number.isFinite(capacidadMaxima) || capacidadMaxima <= 0) {
-    return { ok: false, error: "La capacidad máxima debe ser un número mayor a cero." }
-  }
-  if (cantidadNueva > capacidadMaxima) {
-    return { ok: false, error: "La cantidad no puede ser mayor que la capacidad máxima del tanque." }
   }
   if (!unidad) {
     return { ok: false, error: "Debes indicar una unidad de medida." }
@@ -48,12 +39,7 @@ export async function actualizarNivel(formData: FormData): Promise<ActionResult>
   // Actualizar el nivel actual
   const { error: updateError } = await supabase
     .from("materias_primas")
-    .update({
-      cantidad: cantidadNueva,
-      capacidad_maxima: capacidadMaxima,
-      unidad,
-      actualizado_en: new Date().toISOString(),
-    })
+    .update({ cantidad: cantidadNueva, unidad, actualizado_en: new Date().toISOString() })
     .eq("id", id)
 
   if (updateError) {
