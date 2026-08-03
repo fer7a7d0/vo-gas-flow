@@ -88,7 +88,7 @@ export default async function Home() {
             Dashboard de tanques termo
           </h1>
           <p className="mt-2 max-w-3xl text-muted-foreground text-pretty">
-            Visualiza el nivel actual de Ar, N2, O2, CO2 #1 y CO2 #2. Cada tanque permite registrar su nivel de forma directa.
+            Visualiza el nivel actual
           </p>
 
           <section className="mt-5 rounded-xl border border-border bg-background/60 p-4">
