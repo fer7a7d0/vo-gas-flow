@@ -1,34 +1,34 @@
 import { createClient } from "@/lib/supabase/server"
 import { TarjetaMateria, type Materia } from "@/components/tarjeta-materia"
+import { TANQUES, normalizarNombre } from "@/lib/tanques"
 
-type ConfigTanque = {
-  clave: string
-  nombreUI: string
-  aliases: string[]
+function clampPorcentaje(valor: number) {
+  if (!Number.isFinite(valor)) return 0
+  return Math.max(0, Math.min(100, valor))
 }
 
-const TANQUES: ConfigTanque[] = [
-  { clave: "AR", nombreUI: "Ar", aliases: ["ar", "argon", "argón"] },
-  { clave: "N2", nombreUI: "N2", aliases: ["n2", "nitrogeno", "nitrógeno"] },
-  { clave: "O2", nombreUI: "O2", aliases: ["o2", "oxigeno", "oxígeno"] },
-  {
-    clave: "CO2_1",
-    nombreUI: "CO2 #1",
-    aliases: ["co2 #1", "co2 1", "co2-1", "bioxido de carbono #1", "bióxido de carbono #1"],
-  },
-  {
-    clave: "CO2_2",
-    nombreUI: "CO2 #2",
-    aliases: ["co2 #2", "co2 2", "co2-2", "bioxido de carbono #2", "bióxido de carbono #2"],
-  },
-]
+function estadoNivel(porcentaje: number) {
+  if (porcentaje < 30) {
+    return {
+      texto: "Critico",
+      colorBarra: "bg-rose-500",
+      colorChip: "bg-rose-500/10 text-rose-700 border-rose-300/50 dark:text-rose-300",
+    }
+  }
 
-function normalizarNombre(valor: string) {
-  return valor
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .trim()
-    .toLowerCase()
+  if (porcentaje <= 60) {
+    return {
+      texto: "Atencion",
+      colorBarra: "bg-amber-500",
+      colorChip: "bg-amber-500/10 text-amber-700 border-amber-300/50 dark:text-amber-300",
+    }
+  }
+
+  return {
+    texto: "Optimo",
+    colorBarra: "bg-emerald-500",
+    colorChip: "bg-emerald-500/10 text-emerald-700 border-emerald-300/50 dark:text-emerald-300",
+  }
 }
 
 export default async function Home() {
@@ -51,6 +51,8 @@ export default async function Home() {
       return {
         ...encontrada,
         tanque: tanque.nombreUI,
+        claveTanque: tanque.clave,
+        capacidadMaxima: tanque.capacidadMaxima,
       }
     }
 
@@ -61,8 +63,21 @@ export default async function Home() {
       unidad: "%",
       actualizado_en: "",
       tanque: tanque.nombreUI,
+      claveTanque: tanque.clave,
+      capacidadMaxima: tanque.capacidadMaxima,
     }
   })
+
+  const resumenTanques = materias
+    .map((materia) => {
+      const porcentaje = clampPorcentaje(Number(materia.cantidad))
+      return {
+        nombre: materia.tanque ?? materia.nombre,
+        porcentaje,
+        estado: estadoNivel(porcentaje),
+      }
+    })
+    .sort((a, b) => a.porcentaje - b.porcentaje)
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -75,6 +90,36 @@ export default async function Home() {
           <p className="mt-2 max-w-3xl text-muted-foreground text-pretty">
             Visualiza el nivel actual de Ar, N2, O2, CO2 #1 y CO2 #2. Cada tanque permite registrar su nivel de forma directa.
           </p>
+
+          <section className="mt-5 rounded-xl border border-border bg-background/60 p-4">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="text-sm font-semibold tracking-wide text-foreground uppercase">Resumen general de niveles</h2>
+              <p className="text-xs text-muted-foreground">Ordenado de menor a mayor</p>
+            </div>
+
+            <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
+              {resumenTanques.map((tanque) => (
+                <li key={tanque.nombre} className="rounded-lg border border-border bg-card px-3 py-2.5">
+                  <div className="mb-1.5 flex items-center justify-between gap-2">
+                    <p className="text-sm font-medium text-card-foreground">{tanque.nombre}</p>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-semibold tabular-nums text-card-foreground">{tanque.porcentaje}%</span>
+                      <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tanque.estado.colorChip}`}>
+                        {tanque.estado.texto}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="h-2.5 w-full overflow-hidden rounded-full bg-muted">
+                    <div
+                      className={`h-full rounded-full transition-all duration-500 ${tanque.estado.colorBarra}`}
+                      style={{ width: `${tanque.porcentaje}%` }}
+                    />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
         </header>
 
         {error && (
