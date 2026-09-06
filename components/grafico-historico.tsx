@@ -1,6 +1,7 @@
 "use client"
 
 import { Materia } from "@/components/tarjeta-materia"
+import { Line, LineChart, CartesianGrid, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from "recharts"
 
 type DatoHistorico = {
   fecha: string
@@ -64,9 +65,24 @@ export function GraficoHistorico({ materia, datos }: GraficoHistoricoProps) {
 
         <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">
           <h2 className="mb-6 text-lg font-semibold tracking-tight text-card-foreground">Gráfico de línea</h2>
-          <div className="flex h-64 items-center justify-center rounded-lg bg-background/60 text-muted-foreground">
-            <p className="text-sm">Gráfico se cargará aquí (Recharts)</p>
-          </div>
+          {datos.length > 0 ? (
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={[...datos].reverse()}>
+                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <XAxis dataKey="fecha" tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                  <Tooltip formatter={(value: number) => [`${value}%`, "Nivel"]} />
+                  <ReferenceLine y={30} stroke="#ef4444" strokeDasharray="4 4" />
+                  <Line type="monotone" dataKey="porcentaje" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div className="flex h-64 items-center justify-center rounded-lg bg-background/60 text-muted-foreground">
+              <p className="text-sm">Sin datos históricos disponibles</p>
+            </div>
+          )}
         </section>
 
         <section className="rounded-2xl border border-border bg-card p-6 shadow-sm">

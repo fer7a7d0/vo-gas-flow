@@ -84,16 +84,24 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
                           <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tanque.estado.colorChip}`}>
                             {tanque.estado.texto}
                           </span>
-                          <button
+                          <div
                             onClick={(e) => {
                               e.stopPropagation()
                               setGraficoSeleccionado(tanque.nombre)
                             }}
-                            className="ml-1 rounded-md bg-muted p-1 text-muted-foreground transition-all hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
+                            className="ml-1 rounded-md bg-muted p-1 text-muted-foreground transition-all hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
                             title="Ver gráfico histórico"
+                            role="button"
+                            tabIndex={0}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.stopPropagation()
+                                setGraficoSeleccionado(tanque.nombre)
+                              }
+                            }}
                           >
                             <LineChart className="h-4 w-4" />
-                          </button>
+                          </div>
                         </div>
                       </div>
 

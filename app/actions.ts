@@ -98,7 +98,7 @@ export async function obtenerHistorialTanque(materiaId: string) {
     .select("cantidad_nueva, nota, creado_en")
     .eq("materia_prima_id", materiaId)
     .gte("creado_en", hace14Dias.toISOString())
-    .order("creado_en", { ascending: true })
+    .order("creado_en", { ascending: false })
 
   if (error) {
     console.error("Error obteniendo historial:", error)
