@@ -26,7 +26,7 @@ function clampNivel(valor: number, capacidadMaxima: number) {
 }
 
 function formatoCorto(valor: number) {
-  return Number(valor.toFixed(2)).toString()
+  return Math.round(valor).toString()
 }
 
 function colorNivel(porcentaje: number) {

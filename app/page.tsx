@@ -5,7 +5,7 @@ import { DashboardSelector } from "@/app/dashboard-selector"
 
 function clampPorcentaje(valor: number) {
   if (!Number.isFinite(valor)) return 0
-  return Math.max(0, Math.min(100, valor))
+  return Math.round(Math.max(0, Math.min(100, valor)))
 }
 
 function estadoNivel(porcentaje: number) {

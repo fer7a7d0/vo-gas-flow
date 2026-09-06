@@ -31,7 +31,7 @@ export async function actualizarNivel(formData: FormData): Promise<ActionResult>
     return { ok: false, error: "Debes indicar una unidad de medida." }
   }
 
-  const porcentajeNuevo = Number(((nivelMedido / tanqueConfig.capacidadMaxima) * 100).toFixed(2))
+  const porcentajeNuevo = Math.round((nivelMedido / tanqueConfig.capacidadMaxima) * 100)
 
   const supabase = await createClient()
   let materiaId = id
