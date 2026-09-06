@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useTransition } from "react"
 import { TarjetaMateria, type Materia } from "@/components/tarjeta-materia"
 import { GraficoHistorico } from "@/components/grafico-historico"
 import { Button } from "@/components/ui/button"
 import { LineChart } from "lucide-react"
+import { obtenerHistorialTanque } from "@/app/actions"
 
 type ResumenTanque = {
   nombre: string
@@ -25,10 +26,22 @@ type DashboardSelectorProps = {
 export function DashboardSelector({ resumenTanques, materias, error }: DashboardSelectorProps) {
   const [tanqueSeleccionado, setTanqueSeleccionado] = useState<string | null>(null)
   const [graficoSeleccionado, setGraficoSeleccionado] = useState<string | null>(null)
+  const [historialDatos, setHistorialDatos] = useState<Array<{ fecha: string; porcentaje: number; nota?: string }>>([])
+  const [isPending, startTransition] = useTransition()
 
   const materiaPorNombre = new Map(materias.map((m) => [m.tanque ?? m.nombre, m]))
   const materiaSeleccionada = tanqueSeleccionado ? materiaPorNombre.get(tanqueSeleccionado) : null
   const materiaGrafico = graficoSeleccionado ? materiaPorNombre.get(graficoSeleccionado) : null
+
+  // Obtener historial cuando se selecciona un gráfico
+  useEffect(() => {
+    if (graficoSeleccionado && materiaGrafico?.id) {
+      startTransition(async () => {
+        const datos = await obtenerHistorialTanque(materiaGrafico.id)
+        setHistorialDatos(datos)
+      })
+    }
+  }, [graficoSeleccionado, materiaGrafico])
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -109,7 +122,13 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
             >
               ← Volver al resumen
             </Button>
-            <GraficoHistorico materia={materiaGrafico} datos={[]} />
+            {isPending ? (
+              <div className="flex h-64 items-center justify-center rounded-lg bg-muted text-muted-foreground">
+                <p className="text-sm">Cargando historial...</p>
+              </div>
+            ) : (
+              <GraficoHistorico materia={materiaGrafico} datos={historialDatos} />
+            )}
           </section>
         )}
 
