@@ -36,10 +36,14 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
   // Obtener historial cuando se selecciona un gráfico
   useEffect(() => {
     if (graficoSeleccionado && materiaGrafico?.id) {
+      console.log("DashboardSelector: cargando historial para", graficoSeleccionado, "id:", materiaGrafico.id)
       startTransition(async () => {
         const datos = await obtenerHistorialTanque(materiaGrafico.id)
+        console.log("DashboardSelector: datos obtenidos:", datos)
         setHistorialDatos(datos)
       })
+    } else {
+      console.log("DashboardSelector: no se puede cargar historial - graficoSeleccionado:", graficoSeleccionado, "id:", materiaGrafico?.id)
     }
   }, [graficoSeleccionado, materiaGrafico])
 

@@ -82,25 +82,34 @@ export async function actualizarNivel(formData: FormData): Promise<ActionResult>
 export async function obtenerHistorialTanque(materiaId: string) {
   const supabase = await createClient()
   
+  if (!materiaId) {
+    console.error("obtenerHistorialTanque: materiaId está vacío")
+    return []
+  }
+
+  console.log("obtenerHistorialTanque: buscando para materiaId =", materiaId)
+  
   // Obtener movimientos de los últimos 14 días
   const hace14Dias = new Date()
   hace14Dias.setDate(hace14Dias.getDate() - 14)
 
   const { data, error } = await supabase
     .from("movimientos")
-    .select("cantidad_nueva, nota, created_at")
+    .select("cantidad_nueva, nota, creado_en")
     .eq("materia_prima_id", materiaId)
-    .gte("created_at", hace14Dias.toISOString())
-    .order("created_at", { ascending: true })
+    .gte("creado_en", hace14Dias.toISOString())
+    .order("creado_en", { ascending: true })
 
   if (error) {
     console.error("Error obteniendo historial:", error)
     return []
   }
 
+  console.log("obtenerHistorialTanque: encontrados", data?.length || 0, "registros")
+
   return (
     data?.map((item) => ({
-      fecha: new Date(item.created_at).toLocaleDateString("es-ES", {
+      fecha: new Date(item.creado_en).toLocaleDateString("es-ES", {
         year: "numeric",
         month: "short",
         day: "numeric",
