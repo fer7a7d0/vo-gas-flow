@@ -2,7 +2,9 @@
 
 import { useState } from "react"
 import { TarjetaMateria, type Materia } from "@/components/tarjeta-materia"
+import { GraficoHistorico } from "@/components/grafico-historico"
 import { Button } from "@/components/ui/button"
+import { LineChart } from "lucide-react"
 
 type ResumenTanque = {
   nombre: string
@@ -22,9 +24,11 @@ type DashboardSelectorProps = {
 
 export function DashboardSelector({ resumenTanques, materias, error }: DashboardSelectorProps) {
   const [tanqueSeleccionado, setTanqueSeleccionado] = useState<string | null>(null)
+  const [graficoSeleccionado, setGraficoSeleccionado] = useState<string | null>(null)
 
   const materiaPorNombre = new Map(materias.map((m) => [m.tanque ?? m.nombre, m]))
   const materiaSeleccionada = tanqueSeleccionado ? materiaPorNombre.get(tanqueSeleccionado) : null
+  const materiaGrafico = graficoSeleccionado ? materiaPorNombre.get(graficoSeleccionado) : null
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
@@ -38,7 +42,7 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
             Visualiza el nivel actual
           </p>
 
-          {!tanqueSeleccionado && (
+          {!tanqueSeleccionado && !graficoSeleccionado && (
             <section className="mt-5 rounded-xl border border-border bg-background/60 p-4">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold tracking-wide text-foreground uppercase">
@@ -49,12 +53,12 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
 
               <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {resumenTanques.map((tanque) => (
-                  <li key={tanque.nombre}>
+                  <li key={tanque.nombre} className="rounded-lg border border-border bg-card">
                     <button
                       onClick={() => setTanqueSeleccionado(tanque.nombre)}
-                      className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-left transition-all hover:bg-card/80 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-ring"
+                      className="w-full text-left p-3 focus:outline-none focus:ring-2 focus:ring-ring rounded-lg transition-all hover:bg-card/80"
                     >
-                      <div className="mb-1.5 flex items-center justify-between gap-2">
+                      <div className="mb-2 flex items-center justify-between gap-2">
                         <p className="text-sm font-medium text-card-foreground">{tanque.nombre}</p>
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-semibold tabular-nums text-card-foreground">
@@ -63,6 +67,16 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
                           <span className={`rounded-full border px-2 py-0.5 text-[11px] font-semibold ${tanque.estado.colorChip}`}>
                             {tanque.estado.texto}
                           </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setGraficoSeleccionado(tanque.nombre)
+                            }}
+                            className="ml-1 rounded-md bg-muted p-1 text-muted-foreground transition-all hover:bg-muted/80 focus:outline-none focus:ring-2 focus:ring-ring"
+                            title="Ver gráfico histórico"
+                          >
+                            <LineChart className="h-4 w-4" />
+                          </button>
                         </div>
                       </div>
 
@@ -86,6 +100,19 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
           </p>
         )}
 
+        {graficoSeleccionado && materiaGrafico && (
+          <section className="flex flex-col gap-4">
+            <Button
+              onClick={() => setGraficoSeleccionado(null)}
+              variant="outline"
+              className="w-fit"
+            >
+              ← Volver al resumen
+            </Button>
+            <GraficoHistorico materia={materiaGrafico} datos={[]} />
+          </section>
+        )}
+
         {tanqueSeleccionado && materiaSeleccionada && (
           <section className="flex flex-col gap-4">
             <Button
@@ -103,7 +130,7 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
           </section>
         )}
 
-        {!tanqueSeleccionado && !error && materias.every((m) => !m.id) && (
+        {!tanqueSeleccionado && !graficoSeleccionado && !error && materias.every((m) => !m.id) && (
           <p className="rounded-lg border border-amber-300/50 bg-amber-500/10 px-4 py-3 text-sm text-amber-700 dark:text-amber-300">
             Ningún tanque coincide con los nombres esperados. Crea los registros en la tabla materias_primas para habilitar el guardado.
           </p>
