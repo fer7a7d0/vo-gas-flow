@@ -49,19 +49,21 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
   async function compartirWhatsApp() {
     if (!headerRef.current || isSharing) return
     setIsSharing(true)
-    const texto = generarTextoResumen(resumenTanques)
     try {
       const dataUrl = await toPng(headerRef.current, { pixelRatio: 2 })
       const blob = await (await fetch(dataUrl)).blob()
       const archivo = new File([blob], "resumen-tanques.png", { type: "image/png" })
 
+      // La imagen ya muestra el detalle; el texto solo se usa cuando no hay soporte para adjuntar archivos.
       if (navigator.canShare?.({ files: [archivo] })) {
-        await navigator.share({ files: [archivo], text: texto, title: "Resumen de niveles" })
+        await navigator.share({ files: [archivo], title: "Resumen de niveles" })
       } else {
+        const texto = generarTextoResumen(resumenTanques)
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank")
       }
     } catch (err) {
       if ((err as DOMException)?.name !== "AbortError") {
+        const texto = generarTextoResumen(resumenTanques)
         window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank")
       }
     } finally {
