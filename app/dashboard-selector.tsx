@@ -49,8 +49,8 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
 
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6 py-10 md:py-12">
-        <header className="rounded-2xl border border-border bg-card p-6 shadow-sm">
+      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-3 py-10 sm:px-6 md:py-12">
+        <header className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
           <p className="text-xs font-semibold tracking-[0.24em] text-primary uppercase">Panel de planta</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-card-foreground text-balance">
             Dashboard de tanques termo
@@ -60,7 +60,7 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
           </p>
 
           {!tanqueSeleccionado && !graficoSeleccionado && (
-            <section className="mt-5 rounded-xl border border-border bg-background/60 p-4">
+            <section className="mt-5 rounded-xl border border-border bg-background/60 p-3 sm:p-4">
               <div className="mb-3 flex items-center justify-between gap-2">
                 <h2 className="text-sm font-semibold tracking-wide text-foreground uppercase">
                   Resumen general de niveles
