@@ -67,10 +67,10 @@ export function GraficoHistorico({ materia, datos }: GraficoHistoricoProps) {
           {datos.length > 0 ? (
             <div className="h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={[...datos].reverse()}>
+                <LineChart data={[...datos].reverse()} margin={{ top: 5, right: 10, bottom: 0, left: -20 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
                   <XAxis dataKey="fecha" tick={{ fontSize: 11 }} />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={40} />
                   <Tooltip formatter={(value: number) => [`${value}%`, "Nivel"]} />
                   <ReferenceLine y={30} stroke="#ef4444" strokeDasharray="4 4" />
                   <Line type="monotone" dataKey="porcentaje" stroke="#2563eb" strokeWidth={2} dot={{ r: 3 }} />
