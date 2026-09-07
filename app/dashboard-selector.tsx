@@ -1,10 +1,11 @@
 "use client"
 
-import { useState, useEffect, useTransition } from "react"
+import { useEffect, useRef, useState, useTransition } from "react"
 import { TarjetaMateria, type Materia } from "@/components/tarjeta-materia"
 import { GraficoHistorico } from "@/components/grafico-historico"
 import { Button } from "@/components/ui/button"
-import { LineChart } from "lucide-react"
+import { LineChart, Share2 } from "lucide-react"
+import { toPng } from "html-to-image"
 import { obtenerHistorialTanque } from "@/app/actions"
 
 type ResumenTanque = {
@@ -15,6 +16,20 @@ type ResumenTanque = {
     colorBarra: string
     colorChip: string
   }
+}
+
+const EMOJI_ESTADO: Record<string, string> = {
+  Critico: "\u{1F534}",
+  Atencion: "\u{1F7E1}",
+  Optimo: "\u{1F7E2}",
+}
+
+function generarTextoResumen(resumenTanques: ResumenTanque[]) {
+  const fecha = new Date().toLocaleDateString("es-ES", { day: "2-digit", month: "2-digit", year: "numeric" })
+  const lineas = resumenTanques.map(
+    (t) => `${EMOJI_ESTADO[t.estado.texto] ?? "\u26AA"} ${t.nombre}: ${t.porcentaje}% (${t.estado.texto})`,
+  )
+  return [`\u{1F4CA} Resumen de niveles - ${fecha}`, "", ...lineas].join("\n")
 }
 
 type DashboardSelectorProps = {
@@ -28,6 +43,31 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
   const [graficoSeleccionado, setGraficoSeleccionado] = useState<string | null>(null)
   const [historialDatos, setHistorialDatos] = useState<Array<{ fecha: string; porcentaje: number; nota?: string }>>([])
   const [isPending, startTransition] = useTransition()
+  const [isSharing, setIsSharing] = useState(false)
+  const headerRef = useRef<HTMLElement>(null)
+
+  async function compartirWhatsApp() {
+    if (!headerRef.current || isSharing) return
+    setIsSharing(true)
+    const texto = generarTextoResumen(resumenTanques)
+    try {
+      const dataUrl = await toPng(headerRef.current, { pixelRatio: 2 })
+      const blob = await (await fetch(dataUrl)).blob()
+      const archivo = new File([blob], "resumen-tanques.png", { type: "image/png" })
+
+      if (navigator.canShare?.({ files: [archivo] })) {
+        await navigator.share({ files: [archivo], text: texto, title: "Resumen de niveles" })
+      } else {
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank")
+      }
+    } catch (err) {
+      if ((err as DOMException)?.name !== "AbortError") {
+        window.open(`https://wa.me/?text=${encodeURIComponent(texto)}`, "_blank")
+      }
+    } finally {
+      setIsSharing(false)
+    }
+  }
 
   const materiaPorNombre = new Map(materias.map((m) => [m.tanque ?? m.nombre, m]))
   const materiaSeleccionada = tanqueSeleccionado ? materiaPorNombre.get(tanqueSeleccionado) : null
@@ -50,7 +90,7 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
   return (
     <div className="min-h-screen bg-background font-sans text-foreground">
       <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-3 py-10 sm:px-6 md:py-12">
-        <header className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
+        <header ref={headerRef} className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-6">
           <p className="text-xs font-semibold tracking-[0.24em] text-primary uppercase">Panel de planta</p>
           <h1 className="mt-2 text-3xl font-bold tracking-tight text-card-foreground text-balance">
             Dashboard de tanques termo
@@ -65,8 +105,16 @@ export function DashboardSelector({ resumenTanques, materias, error }: Dashboard
                 <h2 className="text-sm font-semibold tracking-wide text-foreground uppercase">
                   Resumen general de niveles
                 </h2>
-                <p className="text-xs text-muted-foreground">Ordenado de menor a mayor</p>
+                <button
+                  onClick={compartirWhatsApp}
+                  disabled={isSharing}
+                  className="flex items-center gap-1.5 rounded-md bg-muted px-2 py-1 text-xs font-medium text-muted-foreground transition-all hover:bg-muted/80 disabled:opacity-60"
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  {isSharing ? "Generando..." : "Compartir"}
+                </button>
               </div>
+              <p className="mb-3 text-xs text-muted-foreground">Ordenado de menor a mayor</p>
 
               <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 {resumenTanques.map((tanque) => (
