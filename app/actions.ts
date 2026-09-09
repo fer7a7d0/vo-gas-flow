@@ -110,6 +110,7 @@ export async function obtenerHistorialTanque(materiaId: string) {
   return (
     data?.map((item) => ({
       fecha: new Date(item.creado_en).toLocaleDateString("es-ES", {
+        timeZone: "America/Mexico_City",
         year: "numeric",
         month: "short",
         day: "numeric",
