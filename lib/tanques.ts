@@ -8,9 +8,9 @@ export type TanqueConfig = {
 }
 
 export const TANQUES: TanqueConfig[] = [
-  { clave: "AR", nombreUI: "Ar", capacidadMaxima: 380, aliases: ["ar", "argon", "argón"] },
-  { clave: "N2", nombreUI: "N2", capacidadMaxima: 62, aliases: ["n2", "nitrogeno", "nitrógeno"] },
-  { clave: "O2", nombreUI: "O2", capacidadMaxima: 100, aliases: ["o2", "oxigeno", "oxígeno"] },
+  { clave: "AR", nombreUI: "LAR", capacidadMaxima: 380, aliases: ["ar", "lar", "argon", "argón"] },
+  { clave: "N2", nombreUI: "LIN", capacidadMaxima: 62, aliases: ["n2", "lin", "nitrogeno", "nitrógeno"] },
+  { clave: "O2", nombreUI: "LOX", capacidadMaxima: 100, aliases: ["o2", "lox", "oxigeno", "oxígeno"] },
   {
     clave: "CO2_1",
     nombreUI: "CO2 #1",
